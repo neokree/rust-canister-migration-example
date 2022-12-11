@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "canisters": {
+    "migration_test_backend": {
+      "type": "rust",
+      "package": "migration_test_backend",
+      "candid": "src/migration_test_backend/migration_test_backend.did"
+    },
+    "migration_test_frontend": {
+      "type": "assets",
+      "source": [
+        "src/migration_test_frontend/assets"
+      ],
+      "dependencies": [
+        "migration_test_backend"
+      ]
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "",
+      "args": ""
+    }
+  }
+}
