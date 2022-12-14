@@ -1,26 +1,18 @@
-# migration_test
+# Rust canister data migration example
 
-Welcome to your new migration_test project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+This is a test repo which shows the code required to do canister data migration, when upgrading to new canister code. 
+It's based on the counter example canister, which comes as default with new rust projects.
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+## Things to be careful on 
 
-To learn more before you start working with migration_test, see the following documentation available online:
+When developing a new canister **ALWAYS** set and use the `pre_upgrade` method.  
+Otherwise all canisters data will be lost on the next code migration.
 
-- [Quick Start](https://smartcontracts.org/docs/quickstart/quickstart-intro.html)
-- [SDK Developer Tools](https://smartcontracts.org/docs/developers-guide/sdk-guide.html)
-- [Rust Canister Devlopment Guide](https://smartcontracts.org/docs/rust-guide/rust-intro.html)
-- [ic-cdk](https://docs.rs/ic-cdk)
-- [ic-cdk-macros](https://docs.rs/ic-cdk-macros)
-- [Candid Introduction](https://smartcontracts.org/docs/candid-guide/candid-intro.html)
-- [JavaScript API Reference](https://erxue-5aaaa-aaaab-qaagq-cai.raw.ic0.app)
+The `pre_upgrade` method is called when an existing canister is being deployed, or the ICP node is starting up and loading data from disk (also during development).
 
-If you want to start working on your project right away, you might want to try the following commands:
-
-```bash
-cd migration_test/
-dfx help
-dfx canister --help
-```
+When doing a migration:
+- `pre_upgrade` is always called on the code currently deployed on ICP, if you are deploying a new canister, it will call the **OLD** canister code, not the new one you are deploying. 
+- `post_upgrade` of the new code (canister) you are deploying will then be triggered, to restore all data stored in the migration. 
 
 ## Running the project locally
 
@@ -30,8 +22,10 @@ If you want to test your project locally, you can use the following commands:
 # Starts the replica, running in the background
 dfx start --background
 
-# Deploys your canisters to the replica and generates your candid interface
+# Deploys your canisters to the replica
 dfx deploy
 ```
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
+Once the job completes, your application will be available at `http://localhost:4943?canisterId={canister_id}`.
+
+### If this was helpful to you, consider adding a star, thank you
