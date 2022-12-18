@@ -1,28 +1,31 @@
 use ic_cdk::{export::candid, storage};
 use ic_cdk_macros::*;
-use lazy_static::lazy_static;
-use std::sync::Mutex;
+use std::cell::RefCell;
 
-lazy_static! {
-    static ref COUNTER: Mutex<candid::Nat> = Mutex::new(candid::Nat::from(0));
+thread_local! {
+    // Initialize the RefCell with a value of 0
+    static COUNTER: RefCell<candid::Nat> = RefCell::new(candid::Nat::from(0));
 }
 
 #[update]
 fn increment() {
-    let mut counter = COUNTER.lock().unwrap();
-    *counter += 1u64;
+    COUNTER.with(|counter| {
+        *counter.borrow_mut() += 1u64;
+    });
 }
 
 #[query]
 fn get() -> candid::Nat {
-    COUNTER.lock().unwrap().clone()
+    COUNTER.with(|counter| counter.borrow().clone())
 }
 
 #[pre_upgrade]
 fn pre_upgrade() {
     ic_cdk::println!("pre_upgrade IN");
-    let counter = COUNTER.lock().unwrap();
-    _ = storage::stable_save((counter.clone(),));
+    COUNTER.with(|c| {
+        let counter = c.borrow();
+        _ = storage::stable_save((counter.clone(),));
+    });
     ic_cdk::println!("pre_upgrade OUT");
 }
 
@@ -30,6 +33,8 @@ fn pre_upgrade() {
 fn post_upgrade() {
     ic_cdk::println!("post_upgrade IN");
     let (counter,): (candid::Nat,) = storage::stable_restore().unwrap_or((candid::Nat::from(0),));
-    *COUNTER.lock().unwrap() = counter;
+    COUNTER.with(|counter_cell| {
+        *counter_cell.borrow_mut() = counter;
+    });
     ic_cdk::println!("post_upgrade OUT");
 }
