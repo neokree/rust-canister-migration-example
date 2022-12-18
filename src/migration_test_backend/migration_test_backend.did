@@ -1,4 +1,5 @@
 service : {
-  "increment": () -> ();
+  "increment": () -> (nat);
   "get": () -> (nat) query;
+  "set": (nat) -> (nat); 
 }

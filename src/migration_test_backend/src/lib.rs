@@ -8,15 +8,22 @@ thread_local! {
 }
 
 #[update]
-fn increment() {
+fn increment() -> candid::Nat {
     COUNTER.with(|counter| {
         *counter.borrow_mut() += 1u64;
     });
+    get()
 }
 
 #[query]
 fn get() -> candid::Nat {
     COUNTER.with(|counter| counter.borrow().clone())
+}
+
+#[update]
+fn set(input: candid::Nat) -> candid::Nat {
+    COUNTER.with(|counter| counter.borrow_mut().0 = input.0);
+    get()
 }
 
 #[pre_upgrade]
